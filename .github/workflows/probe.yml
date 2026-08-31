@@ -7,10 +7,14 @@ jobs:
       image: devkitpro/devkitppc:latest
     steps:
       - run: |
-          dkp-pacman -Sy --noconfirm
+          for i in 1 2 3 4 5; do
+            dkp-pacman -Sy --noconfirm && break
+            echo "sync attempt $i failed, retrying in 15s..."
+            sleep 15
+          done
           echo "=== packages matching whb ==="
           dkp-pacman -Ssq | grep -i whb || echo "(none)"
           echo "=== packages matching wut ==="
           dkp-pacman -Ssq | grep -i wut || echo "(none)"
-          echo "=== contents of the wut package (is whb bundled in it?) ==="
+          echo "=== files inside the wut package (is whb bundled in it?) ==="
           dkp-pacman -Ql wut 2>/dev/null | grep -i whb || echo "(no whb files inside wut package)"
