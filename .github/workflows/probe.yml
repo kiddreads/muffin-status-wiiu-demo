@@ -1,0 +1,16 @@
+name: Probe devkitPro package names
+on: workflow_dispatch
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkitppc:latest
+    steps:
+      - run: |
+          dkp-pacman -Sy --noconfirm
+          echo "=== packages matching whb ==="
+          dkp-pacman -Ssq | grep -i whb || echo "(none)"
+          echo "=== packages matching wut ==="
+          dkp-pacman -Ssq | grep -i wut || echo "(none)"
+          echo "=== contents of the wut package (is whb bundled in it?) ==="
+          dkp-pacman -Ql wut 2>/dev/null | grep -i whb || echo "(no whb files inside wut package)"
