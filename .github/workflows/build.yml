@@ -16,7 +16,7 @@ jobs:
 
       - name: Install WUT
         run: |
-          dkp-pacman -Sy --noconfirm --needed wut libwhb || pacman -Sy --noconfirm --needed wut libwhb
+          for i in 1 2 3 4 5; do dkp-pacman -Sy --noconfirm --needed wut && break; sleep 15; done
           echo "DEVKITPRO=/opt/devkitpro" >> "$GITHUB_ENV"
 
       - name: Configure
