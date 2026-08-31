@@ -1,0 +1,45 @@
+name: Build Wii U status demo (.rpx)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkitppc:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install WUT
+        run: |
+          dkp-pacman -Sy --noconfirm --needed wut || pacman -Sy --noconfirm --needed wut
+          echo "DEVKITPRO=/opt/devkitpro" >> "$GITHUB_ENV"
+
+      - name: Configure
+        run: |
+          export DEVKITPRO=/opt/devkitpro
+          cmake -S . -B build \
+            -DCMAKE_TOOLCHAIN_FILE=/opt/devkitpro/cmake/WiiU.cmake \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DMUFFIN_HEAD=${{ github.sha }} \
+            -DMUFFIN_DATE=${{ github.event.head_commit.timestamp || 'unknown' }}
+
+      - name: Build
+        run: cmake --build build -j2
+
+      - name: Locate .rpx
+        id: rpx
+        run: |
+          f=$(find build -name '*.rpx' | head -1)
+          echo "path=$f" >> "$GITHUB_OUTPUT"
+          ls -l "$f"
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: muffin-status-demo
+          path: ${{ steps.rpx.outputs.path }}
